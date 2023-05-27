@@ -1,0 +1,12 @@
+[submodule "3rd_party/imgui"]
+	path = 3rd_party/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "3rd_party/SDL"]
+	path = 3rd_party/SDL
+	url = git@github.com:libsdl-org/SDL.git
+[submodule "3rd_party/stb"]
+	path = 3rd_party/stb
+	url = git@github.com:nothings/stb.git
+[submodule "3rd_party/di"]
+	path = 3rd_party/di
+	url = git@github.com:boost-ext/di.git
