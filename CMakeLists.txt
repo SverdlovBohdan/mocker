@@ -25,5 +25,7 @@ add_subdirectory(base)
 add_subdirectory(3rd_party)
 
 add_executable(mocker main.cpp
-  mocker.cpp)
+  mocker.cpp
+  filesystem_browser.cpp)
+
 target_link_libraries(mocker PRIVATE project_options base 3rd_parties)

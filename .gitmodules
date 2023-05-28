@@ -10,3 +10,6 @@
 [submodule "3rd_party/di"]
 	path = 3rd_party/di
 	url = git@github.com:boost-ext/di.git
+[submodule "3rd_party/expected"]
+	path = 3rd_party/expected
+	url = git@github.com:TartanLlama/expected.git

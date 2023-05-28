@@ -8,6 +8,7 @@
 #include "base/steady_time_provider.h"
 #include "mocker.h"
 #include "ui_application.h"
+#include "filesystem_browser.h"
 
 int main(int, char**) {
   using namespace mk;
@@ -17,6 +18,7 @@ int main(int, char**) {
       di::bind<TaskQueue>.to<PriorityTaskQueue>(),
       di::bind<TimeProvider>.to<SteadyTimeProvider>(),
       di::bind<TaskLoop, DispatchTask, RunLoopBackendExecutor>.to<RunLoopUi>(),
+      di::bind<FilesystemReader>.to<FilesystemBrowser>(),
       di::bind<UiApplication>.to<Mocker>());
 
   auto mocker = injector.create<std::shared_ptr<UiApplication>>();

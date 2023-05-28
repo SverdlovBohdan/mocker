@@ -13,15 +13,18 @@
 #endif
 
 #include "base/task_loop.h"
+#include "filesystem_reader.h"
 
 namespace mk {
 Mocker::Mocker(std::shared_ptr<TaskLoop> ui_task_loop,
-               std::shared_ptr<RunLoopBackendExecutor> backend_executor)
+               std::shared_ptr<RunLoopBackendExecutor> backend_executor,
+               std::shared_ptr<FilesystemReader> filesystem_reader)
     : ui_task_loop_{std::move(ui_task_loop)},
       backend_executor_{std::move(backend_executor)},
+      filesystem_reader_{std::move(filesystem_reader)},
       gl_context_{nullptr},
       window_{nullptr},
-      show_demo_window_{false} {}
+      show_demo_window_{true} {}
 
 UiApplication::Status Mocker::Run() {
   if (const auto status = Initialize(); status != UiApplication::Status::Ok) {
@@ -153,11 +156,109 @@ RunLoopBackendExecutor::IterationStatus Mocker::DrawUi() {
     static float f = 0.0f;
     static int counter = 0;
 
-    ImGui::Begin("Hello, world!");  // Create a window called "Hello, world!"
-                                    // and append into it.
+    ImGui::Begin("Hello, world!", nullptr, ImGuiWindowFlags_MenuBar);
 
-    ImGui::Text("This is some useful text.");  // Display some text (you can use
-                                               // a format strings too)
+    if (ImGui::BeginMainMenuBar()) {
+      if (ImGui::BeginMenu("Mocker")) {
+        if (ImGui::MenuItem("Open logo")) {
+          ImGui::OpenPopup("Browser Logo");
+
+          // Always center this window when appearing
+          ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+          ImGui::SetNextWindowPos(center, ImGuiCond_Appearing,
+                                  ImVec2(0.5f, 0.5f));
+
+          if (ImGui::BeginPopupModal("Browser Logo", nullptr,
+                                     ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text(
+                "All those beautiful files will be deleted.\nThis operation "
+                "cannot be undone!");
+            ImGui::Separator();
+
+            static int unused_i = 0;
+            ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
+
+            if (ImGui::Button("OK", ImVec2(120, 0))) {
+              ImGui::CloseCurrentPopup();
+            }
+            ImGui::SetItemDefaultFocus();
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+              ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+          }
+        }
+
+        if (ImGui::MenuItem("Save")) {
+        }
+
+        ImGui::EndMenu();
+      }
+
+      ImGui::EndMainMenuBar();
+    }
+
+    const auto directory =
+        filesystem_reader_->OpenDirectory(FilesystemReader::CurrentDirectory);
+
+    for (auto item : directory.List()) {
+      ImGui::Selectable(item.c_str(), false);
+    }
+
+    // if (ImGui::Button("Delete.."))
+    //             ImGui::OpenPopup("Delete?");
+
+    //         // Always center this window when appearing
+    //         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    //         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing,
+    //         ImVec2(0.5f, 0.5f));
+
+    //         if (ImGui::BeginPopupModal("Delete?", NULL,
+    //         ImGuiWindowFlags_AlwaysAutoResize))
+    //         {
+    //             ImGui::Text("All those beautiful files will be
+    //             deleted.\nThis operation cannot be undone!");
+    //             ImGui::Separator();
+
+    //             //static int unused_i = 0;
+    //             //ImGui::Combo("Combo", &unused_i, "Delete\0Delete
+    //             harder\0");
+
+    //             static bool dont_ask_me_next_time = false;
+    //             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,
+    //             0)); ImGui::Checkbox("Don't ask me next time",
+    //             &dont_ask_me_next_time); ImGui::PopStyleVar();
+
+    //             if (ImGui::Button("OK", ImVec2(120, 0))) {
+    //             ImGui::CloseCurrentPopup(); } ImGui::SetItemDefaultFocus();
+    //             ImGui::SameLine();
+    //             if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+    //             ImGui::CloseCurrentPopup(); } ImGui::EndPopup();
+    //         }
+
+    // IMGUI_DEMO_MARKER("Widgets/Selectables/Multiple Selection");
+    // if (ImGui::TreeNode("Selection State: Multiple Selection"))
+    // {
+    //     HelpMarker("Hold CTRL and click to select multiple items.");
+    //     static bool selection[5] = { false, false, false, false, false };
+    //     for (int n = 0; n < 5; n++)
+    //     {
+    //         char buf[32];
+    //         sprintf(buf, "Object %d", n);
+    //         if (ImGui::Selectable(buf, selection[n]))
+    //         {
+    //             if (!ImGui::GetIO().KeyCtrl)    // Clear selection when
+    //             CTRL is not held
+    //                 memset(selection, 0, sizeof(selection));
+    //             selection[n] ^= 1;
+    //         }
+    //     }
+    //     ImGui::TreePop();
+    // }
+
+    ImGui::Text("This is some useful text.");  // Display some text (you can
+                                               // use a format strings too)
     ImGui::SliderFloat("float", &f, 0.0f,
                        1.0f);  // Edit 1 float using a slider from 0.0f to 1.0f
     ImGui::ColorEdit3(
@@ -174,19 +275,6 @@ RunLoopBackendExecutor::IterationStatus Mocker::DrawUi() {
                 1000.0f / io.Framerate, io.Framerate);
     ImGui::End();
   }
-
-  // 3. Show another simple window.
-  //   if (show_another_window) {
-  //     ImGui::Begin(
-  //         "Another Window",
-  //         &show_another_window);  // Pass a pointer to our bool variable (the
-  //                                 // window will have a closing button that
-  //                                 will
-  //                                 // clear the bool when clicked)
-  //     ImGui::Text("Hello from another window!");
-  //     if (ImGui::Button("Close Me")) show_another_window = false;
-  //     ImGui::End();
-  //   }
 
   // Rendering
   ImGui::Render();

@@ -9,8 +9,10 @@ add_library(3rd_parties STATIC)
 set(STB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/stb)
 
 # Boost DI
-# STB
 set(DI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/di/include)
+
+# Expected
+set(EXPECTED_DIR ${CMAKE_CURRENT_SOURCE_DIR}/expected/include)
 
 target_sources(3rd_parties PRIVATE
     ${IMGUI_DIR}/imgui_demo.cpp
@@ -29,7 +31,8 @@ target_include_directories(3rd_parties PUBLIC
     ${DI_DIR})
 
 target_include_directories(3rd_parties SYSTEM PUBLIC
-    ${DI_DIR})
+    ${DI_DIR}
+    ${EXPECTED_DIR})
 
 target_compile_features(3rd_parties PRIVATE cxx_std_17 c_std_17)
 
