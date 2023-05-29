@@ -8,13 +8,13 @@
 
 namespace mk {
 class TaskLoop;
-class FilesystemReader;
+class FilesystemBrowserView;
 
 class Mocker : public UiApplication {
  public:
   Mocker(std::shared_ptr<TaskLoop> ui_task_loop,
          std::shared_ptr<RunLoopBackendExecutor> backend_executor,
-         std::shared_ptr<FilesystemReader> filesystem_reader);
+         std::shared_ptr<FilesystemBrowserView> filesystem_browser);
 
   /** @see UiApplication. */
   UiApplication::Status Run() override;
@@ -25,7 +25,7 @@ class Mocker : public UiApplication {
 
   std::shared_ptr<TaskLoop> ui_task_loop_;
   std::shared_ptr<RunLoopBackendExecutor> backend_executor_;
-  std::shared_ptr<FilesystemReader> filesystem_reader_;
+  std::shared_ptr<FilesystemBrowserView> filesystem_browser_;
 
   SDL_GLContext gl_context_;
   SDL_Window* window_;
