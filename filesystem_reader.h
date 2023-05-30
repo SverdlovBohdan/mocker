@@ -39,5 +39,23 @@ class FilesystemReader {
    */
   virtual Directory OpenDirectory(
       std::optional<std::filesystem::path> path) = 0;
+
+  /**
+   * @brief Extract directories paths from path list.
+   *
+   * @param directory_content Directory items list.
+   * @return List of directory paths.
+   */
+  virtual std::vector<std::filesystem::path> ExtractDirectories(
+      const std::vector<std::filesystem::path>& directory_content) = 0;
+
+  /**
+   * @brief Extract files paths from path list.
+   *
+   * @param directory_content Directory items list.
+   * @return List of file paths.
+   */
+  virtual std::vector<std::filesystem::path> ExtractFiles(
+      const std::vector<std::filesystem::path>& directory_content) = 0;
 };
 }  // namespace mk

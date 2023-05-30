@@ -22,10 +22,9 @@ void RunLoopUi::Run() {
 
     if (!queue_->IsEmpty()) {
       const auto now = time_provider_->Now();
-      const auto call_time = queue_->GetNextTaskCallTime();
-      const bool is_ready_to_perform = call_time <= now;
+      bool is_ready_to_perform = queue_->GetNextTaskCallTime() <= now;
 
-      if (is_ready_to_perform) {
+      while (is_ready_to_perform) {
         auto pending_task = queue_->PopTask();
         auto task = pending_task->task;
 
@@ -44,6 +43,8 @@ void RunLoopUi::Run() {
           task_quard_.unlock();
           PostTask(std::move(pending_task));
         }
+
+        is_ready_to_perform = queue_->GetNextTaskCallTime() <= now;
       }
     }
 
