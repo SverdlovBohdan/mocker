@@ -42,6 +42,7 @@ void RunLoopUi::Run() {
 
           task_quard_.unlock();
           PostTask(std::move(pending_task));
+          task_quard_.lock();
         }
 
         is_ready_to_perform = queue_->GetNextTaskCallTime() <= now;

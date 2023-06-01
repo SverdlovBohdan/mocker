@@ -96,7 +96,15 @@ void FilesystemBrowser::Display(std::string_view id) {
 
     if (ImGui::Button("Select", ImVec2(120, 0))) {
       if (selected_files_handler_) {
-        selected_files_handler_({});
+        std::vector<std::filesystem::path> selected_files{};
+        selected_files.reserve(selected_files_state_.size());
+
+        for (size_t n = 0; n < selected_files_state_.size(); ++n) {
+          if (selected_files_state_[n]) {
+            selected_files.push_back(selectable_files[n]);
+          }
+        }
+        selected_files_handler_(selected_files);
       }
       ImGui::CloseCurrentPopup();
     }

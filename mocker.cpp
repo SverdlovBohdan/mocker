@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL.h>
 #include <stdio.h>
+#include <iostream>
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
@@ -124,6 +125,12 @@ UiApplication::Status Mocker::Initialize() {
   // Setup Platform/Renderer backends
   ImGui_ImplSDL3_InitForOpenGL(window_, gl_context_);
   ImGui_ImplOpenGL3_Init(glsl_version);
+
+  filesystem_browser_->SetSelectedFilesHandler([](auto selected_files){
+    for (auto file: selected_files) {
+      std::cout << file << std::endl;
+    }
+  });
 
   return UiApplication::Status::Ok;
 }
