@@ -75,7 +75,7 @@ void FilesystemBrowser::Display(std::string_view id) {
 
     const auto directories = ExtractDirectories(observed_directory_->List());
     for (const auto& directory_path : directories) {
-      if (ImGui::SmallButton(directory_path.c_str())) {
+      if (ImGui::SmallButton(directory_path.filename().c_str())) {
         is_directory_changed_ = true;
         next_directory_ = directory_path;
       }
@@ -83,7 +83,7 @@ void FilesystemBrowser::Display(std::string_view id) {
 
     const auto selectable_files = ExtractFiles(observed_directory_->List());
     for (size_t n = 0; n < selectable_files.size(); ++n) {
-      if (ImGui::Selectable(selectable_files[n].c_str(),
+      if (ImGui::Selectable(selectable_files[n].filename().c_str(),
                             selected_files_state_[n],
                             ImGuiSelectableFlags_DontClosePopups)) {
         if (!ImGui::GetIO().KeyCtrl) {
@@ -93,6 +93,8 @@ void FilesystemBrowser::Display(std::string_view id) {
         selected_files_state_[n] = !selected_files_state_[n];
       }
     }
+
+    ImGui::Separator();
 
     if (ImGui::Button("Select", ImVec2(120, 0))) {
       if (selected_files_handler_) {

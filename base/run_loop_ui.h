@@ -10,7 +10,6 @@
 #include "task_loop.h"
 
 namespace mk {
-class TaskPump;
 class TaskQueue;
 class TimeProvider;
 
@@ -22,8 +21,8 @@ class RunLoopUi : public TaskLoop,
                   public DispatchTask,
                   public RunLoopBackendExecutor {
  public:
-  RunLoopUi(std::shared_ptr<TaskQueue> task_queue,
-            std::shared_ptr<TimeProvider> time_provider);
+  RunLoopUi(std::unique_ptr<TaskQueue> task_queue,
+            std::unique_ptr<TimeProvider> time_provider);
 
   /** @see TaskLoop.*/
   void Run() override;
@@ -53,8 +52,8 @@ class RunLoopUi : public TaskLoop,
 
   void PostTask(std::shared_ptr<PendingTask>&& task);
 
-  std::shared_ptr<TaskQueue> queue_;
-  std::shared_ptr<TimeProvider> time_provider_;
+  std::unique_ptr<TaskQueue> queue_;
+  std::unique_ptr<TimeProvider> time_provider_;
 
   std::mutex task_quard_;
   std::atomic<bool> is_running_;

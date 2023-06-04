@@ -19,8 +19,8 @@ class TimeProvider;
  */
 class RunLoop : public TaskLoop, public DispatchTask {
  public:
-  RunLoop(std::shared_ptr<TaskPump> task_pump,
-          std::shared_ptr<TaskQueue> task_queue,
+  RunLoop(std::unique_ptr<TaskPump> task_pump,
+          std::unique_ptr<TaskQueue> task_queue,
           std::shared_ptr<TimeProvider> time_provider);
 
   /** @see TaskLoop.*/
@@ -48,8 +48,8 @@ class RunLoop : public TaskLoop, public DispatchTask {
 
   void PostTask(std::shared_ptr<PendingTask>&& task);
 
-  std::shared_ptr<TaskPump> pump_;
-  std::shared_ptr<TaskQueue> queue_;
+  std::unique_ptr<TaskPump> pump_;
+  std::unique_ptr<TaskQueue> queue_;
   std::shared_ptr<TimeProvider> time_provider_;
 
   std::mutex task_quard_;

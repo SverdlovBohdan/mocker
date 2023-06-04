@@ -2,7 +2,9 @@
 
 #include <SDL3/SDL.h>
 #include <stdio.h>
+
 #include <iostream>
+#include <thread>
 
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
@@ -13,6 +15,7 @@
 #include <SDL3/SDL_opengl.h>
 #endif
 
+#include "base/dispatch_task.h"
 #include "base/task_loop.h"
 #include "filesystem_browser_view.h"
 #include "filesystem_reader.h"
@@ -23,10 +26,14 @@ constexpr std::string_view kOpenImagesPopup = "Open images?";
 }  // namespace
 
 Mocker::Mocker(std::shared_ptr<TaskLoop> ui_task_loop,
-               std::shared_ptr<RunLoopBackendExecutor> backend_executor,
+               std::shared_ptr<TaskLoop> filesystem_task_loop,
+               std::shared_ptr<DispatchTask> filesystem_task_dispatcher,
+               std::shared_ptr<RunLoopBackendExecutor> ui_backend_executor,
                std::shared_ptr<FilesystemBrowserView> filesystem_browser)
     : ui_task_loop_{std::move(ui_task_loop)},
-      backend_executor_{std::move(backend_executor)},
+      filesystem_task_loop_{std::move(filesystem_task_loop)},
+      filesystem_task_dispatcher_{std::move(filesystem_task_dispatcher)},
+      ui_backend_executor_{std::move(ui_backend_executor)},
       filesystem_browser_{std::move(filesystem_browser)},
       gl_context_{nullptr},
       window_{nullptr},
@@ -37,8 +44,16 @@ UiApplication::Status Mocker::Run() {
     return status;
   }
 
-  backend_executor_->SetBackendTask([this]() { return DrawUi(); });
+  std::thread filesystem_thread([this]() {
+    std::cout << "Run filesystem run loop." << std::endl;
+    filesystem_task_loop_->Run();
+  });
+
+  ui_backend_executor_->SetBackendTask([this]() { return DrawUi(); });
   ui_task_loop_->Run();
+
+  filesystem_task_loop_->Stop();
+  filesystem_thread.join();
 
   // Cleanup
   ImGui_ImplOpenGL3_Shutdown();
@@ -126,8 +141,8 @@ UiApplication::Status Mocker::Initialize() {
   ImGui_ImplSDL3_InitForOpenGL(window_, gl_context_);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  filesystem_browser_->SetSelectedFilesHandler([](auto selected_files){
-    for (auto file: selected_files) {
+  filesystem_browser_->SetSelectedFilesHandler([](auto selected_files) {
+    for (auto file : selected_files) {
       std::cout << file << std::endl;
     }
   });

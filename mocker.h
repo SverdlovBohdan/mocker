@@ -1,20 +1,30 @@
 #pragma once
 
-#include <memory>
 #include <SDL3/SDL.h>
 
-#include "ui_application.h"
+#include <boost/di.hpp>
+#include <memory>
+
 #include "base/run_loop_backend_executor.h"
+#include "di_names.h"
+#include "ui_application.h"
 
 namespace mk {
 class TaskLoop;
 class FilesystemBrowserView;
+class DispatchTask;
 
 class Mocker : public UiApplication {
  public:
-  Mocker(std::shared_ptr<TaskLoop> ui_task_loop,
-         std::shared_ptr<RunLoopBackendExecutor> backend_executor,
-         std::shared_ptr<FilesystemBrowserView> filesystem_browser);
+  BOOST_DI_INJECT(
+      Mocker,
+      (named = di_names::UiRunLoop) std::shared_ptr<TaskLoop> ui_task_loop,
+      (named = di_names::FilesystemRunLoop) std::shared_ptr<TaskLoop>
+          filesystem_task_loop,
+      (named = di_names::FilesystemDispatchTask) std::shared_ptr<DispatchTask>
+          filesystem_task_dispatcher,
+      std::shared_ptr<RunLoopBackendExecutor> ui_backend_executor,
+      std::shared_ptr<FilesystemBrowserView> filesystem_browser);
 
   /** @see UiApplication. */
   UiApplication::Status Run() override;
@@ -24,7 +34,9 @@ class Mocker : public UiApplication {
   RunLoopBackendExecutor::IterationStatus DrawUi();
 
   std::shared_ptr<TaskLoop> ui_task_loop_;
-  std::shared_ptr<RunLoopBackendExecutor> backend_executor_;
+  std::shared_ptr<TaskLoop> filesystem_task_loop_;
+  std::shared_ptr<DispatchTask> filesystem_task_dispatcher_;
+  std::shared_ptr<RunLoopBackendExecutor> ui_backend_executor_;
   std::shared_ptr<FilesystemBrowserView> filesystem_browser_;
 
   SDL_GLContext gl_context_;

@@ -2,13 +2,12 @@
 
 #include <limits>
 
-#include "task_pump.h"
 #include "task_queue.h"
 #include "time_provider.h"
 
 namespace mk {
-RunLoopUi::RunLoopUi(std::shared_ptr<TaskQueue> task_queue,
-                     std::shared_ptr<TimeProvider> time_provider)
+RunLoopUi::RunLoopUi(std::unique_ptr<TaskQueue> task_queue,
+                     std::unique_ptr<TimeProvider> time_provider)
     : queue_{std::move(task_queue)},
       time_provider_{std::move(time_provider)},
       is_running_{false},

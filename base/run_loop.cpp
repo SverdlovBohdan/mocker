@@ -7,8 +7,8 @@
 #include "time_provider.h"
 
 namespace mk {
-RunLoop::RunLoop(std::shared_ptr<TaskPump> task_pump,
-                 std::shared_ptr<TaskQueue> task_queue,
+RunLoop::RunLoop(std::unique_ptr<TaskPump> task_pump,
+                 std::unique_ptr<TaskQueue> task_queue,
                  std::shared_ptr<TimeProvider> time_provider)
     : pump_{std::move(task_pump)},
       queue_{std::move(task_queue)},
