@@ -19,6 +19,7 @@
 #include "base/task_loop.h"
 #include "filesystem_browser_view.h"
 #include "filesystem_reader.h"
+#include "image.h"
 
 namespace mk {
 namespace {
@@ -26,6 +27,7 @@ constexpr std::string_view kOpenImagesPopup = "Open images?";
 }  // namespace
 
 Mocker::Mocker(std::shared_ptr<TaskLoop> ui_task_loop,
+               std::shared_ptr<DispatchTask> ui_task_dispatcher,
                std::shared_ptr<TaskLoop> filesystem_task_loop,
                std::shared_ptr<DispatchTask> filesystem_task_dispatcher,
                std::shared_ptr<RunLoopBackendExecutor> ui_backend_executor,
@@ -33,6 +35,7 @@ Mocker::Mocker(std::shared_ptr<TaskLoop> ui_task_loop,
     : ui_task_loop_{std::move(ui_task_loop)},
       filesystem_task_loop_{std::move(filesystem_task_loop)},
       filesystem_task_dispatcher_{std::move(filesystem_task_dispatcher)},
+      ui_task_dispatcher_{std::move(ui_task_dispatcher)},
       ui_backend_executor_{std::move(ui_backend_executor)},
       filesystem_browser_{std::move(filesystem_browser)},
       gl_context_{nullptr},
@@ -141,9 +144,12 @@ UiApplication::Status Mocker::Initialize() {
   ImGui_ImplSDL3_InitForOpenGL(window_, gl_context_);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  filesystem_browser_->SetSelectedFilesHandler([](auto selected_files) {
-    for (auto file : selected_files) {
-      std::cout << file << std::endl;
+  filesystem_browser_->SetSelectedFilesHandler([this](auto selected_files) {
+    selected_images_.clear();
+
+    for (auto&& file : selected_files) {
+      selected_images_.push_back(std::make_shared<Image>(
+          std::move(file), ui_task_dispatcher_, filesystem_task_dispatcher_));
     }
   });
 
@@ -192,6 +198,10 @@ RunLoopBackendExecutor::IterationStatus Mocker::DrawUi() {
     }
 
     filesystem_browser_->Display(kOpenImagesPopup);
+
+    for (const auto& image : selected_images_) {
+      image->Display();
+    }
 
     ImGui::Text("This is some useful text.");  // Display some text (you can
                                                // use a format strings too)

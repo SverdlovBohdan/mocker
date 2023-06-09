@@ -44,10 +44,12 @@ void RunLoopUi::Run() {
           task_quard_.lock();
         }
 
-        is_ready_to_perform = queue_->GetNextTaskCallTime() <= now;
+        is_ready_to_perform =
+            queue_->IsEmpty() ? false : queue_->GetNextTaskCallTime() <= now;
       }
     }
 
+    lock.unlock();
     if (backend_task_) {
       is_running_ =
           backend_task_() == RunLoopBackendExecutor::IterationStatus::Ok;
@@ -99,6 +101,6 @@ void RunLoopUi::PostTask(std::shared_ptr<PendingTask>&& task) {
 }
 
 void RunLoopUi::SetBackendTask(BackendTask&& backend_task) {
-    backend_task_ = std::move(backend_task);
+  backend_task_ = std::move(backend_task);
 }
 }  // namespace mk

@@ -21,7 +21,8 @@ target_sources(3rd_parties PRIVATE
     ${IMGUI_DIR}/imgui_widgets.cpp
     ${IMGUI_DIR}/imgui.cpp
     ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
-    ${IMGUI_DIR}/backends/imgui_impl_sdl3.cpp)
+    ${IMGUI_DIR}/backends/imgui_impl_sdl3.cpp
+    stb_implementation.cpp)
 
 target_include_directories(3rd_parties PUBLIC
     ${IMGUI_DIR}
