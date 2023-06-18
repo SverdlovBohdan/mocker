@@ -150,6 +150,18 @@ UiApplication::Status Mocker::Initialize() {
     for (auto&& file : selected_files) {
       selected_images_.push_back(std::make_shared<Image>(
           std::move(file), ui_task_dispatcher_, filesystem_task_dispatcher_));
+
+      auto& image = selected_images_.back();
+
+      // TODO(BoSv): Improve size configuration.
+      image->SetSize(200, 150);
+      image->SetErrorHandler([](const auto& path) {
+        ImGui::Text("Can't display %s", path.c_str());
+      });
+      image->SetProgressHandler([]() {
+        ImGui::Text("Loading %c",
+                    "|/-\\"[static_cast<int>(ImGui::GetTime() / 0.05f) & 3]);
+      });
     }
   });
 

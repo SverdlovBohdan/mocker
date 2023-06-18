@@ -21,10 +21,20 @@ class Image : public ImageView, public std::enable_shared_from_this<Image> {
         std::shared_ptr<DispatchTask> ui_task_dispatcher,
         std::shared_ptr<DispatchTask> filesystem_task_dispatcher);
 
-  ~Image();
+  ~Image() override;
 
   /** @see ImageView. */
   void Display() override;
+
+  /** @see ImageView. */
+  void SetSize(std::size_t width, std::size_t height) override;
+
+  /** @see ImageView. */
+  void SetErrorHandler(
+      std::function<void(const std::filesystem::path&)> handler) override;
+
+  /** @see ImageView. */
+  void SetProgressHandler(std::function<void()> handler) override;
 
  private:
   /**
@@ -85,5 +95,11 @@ class Image : public ImageView, public std::enable_shared_from_this<Image> {
 
   ImageTexture texture_;
   std::optional<intptr_t> image_texture_id_;
+
+  std::size_t width_;
+  std::size_t height_;
+
+  std::function<void(const std::filesystem::path&)> error_callback_;
+  std::function<void()> progress_callback_;
 };
 }  // namespace mk

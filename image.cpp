@@ -16,7 +16,9 @@ Image::Image(std::filesystem::path image_path,
     : ui_task_dispatcher_{std::move(ui_task_dispatcher)},
       filesystem_task_dispatcher_{std::move(filesystem_task_dispatcher)},
       image_path_{std::move(image_path)},
-      status_{ReadyStatus::kNone} {}
+      status_{ReadyStatus::kNone},
+      width_{0},
+      height_{0} {}
 
 Image::~Image() {
   if (image_reading_task_handle_) {
@@ -35,12 +37,15 @@ Image::~Image() {
 void Image::Display() {
   switch (status_) {
     case ReadyStatus::kError:
-      std::cout << "Can't display " << image_path_.c_str() << std::endl;
+      if (error_callback_) {
+        error_callback_(image_path_);
+      }
       break;
 
     case ReadyStatus::kReading:
-      ImGui::Text("Loading %c",
-                  "|/-\\"[static_cast<int>(ImGui::GetTime() / 0.05f) & 3]);
+      if (progress_callback_) {
+        progress_callback_();
+      }
       break;
 
     case ReadyStatus::kNone:
@@ -55,13 +60,28 @@ void Image::Display() {
 
       if (image_texture_id_) {
         ImGui::Image(reinterpret_cast<void*>(*image_texture_id_),
-                     ImVec2(texture_.width, texture_.height));
+                     ImVec2(width_ == 0 ? texture_.width : width_,
+                            height_ == 0 ? texture_.height : height_));
       }
       break;
 
     default:
       break;
   }
+}
+
+void Image::SetSize(std::size_t width, std::size_t height) {
+  width_ = width;
+  height_ = height;
+}
+
+void Image::SetErrorHandler(
+    std::function<void(const std::filesystem::path&)> handler) {
+  error_callback_ = handler;
+}
+
+void Image::SetProgressHandler(std::function<void()> handler) {
+  progress_callback_ = handler;
 }
 
 TaskHandle Image::LoadImageFromFileOnFilesystemThread() {
